@@ -38,7 +38,20 @@ def render() -> None:
         file_type = detect_file_type(path)
 
         st.write("Extracting text...")
-        raw_text = extract_text(path)
+        try:
+            raw_text = extract_text(path)
+        except NotImplementedError:
+            st.error("Text extraction is not yet implemented for this file type.")
+            return
+        except ImportError as exc:
+            st.error(str(exc))
+            return
+        except RuntimeError as exc:
+            st.error(str(exc))
+            return
+        except ValueError as exc:
+            st.error(str(exc))
+            return
 
         st.write("Cleaning text...")
         cleaned_text = clean(raw_text)
