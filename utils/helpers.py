@@ -17,3 +17,13 @@ def truncate_text(text: str, max_chars: int = 200) -> str:
     if len(text) <= max_chars:
         return text
     return text[:max_chars].rsplit(" ", 1)[0] + "..."
+
+
+def compute_text_stats(text: str) -> dict[str, int]:
+    lines = text.splitlines()
+    words = text.split()
+    return {
+        "characters": len(text),
+        "words": len(words),
+        "lines": len(lines),
+    }
