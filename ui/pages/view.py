@@ -56,10 +56,11 @@ def render() -> None:
     with tab3:
         st.json(doc.structured_data if doc.structured_data else {})
 
-    col_a, col_b, _ = st.columns([1, 1, 2])
     doc_dict = doc.__dict__.copy()
     if isinstance(doc_dict.get("structured_data"), dict):
         doc_dict["structured_data"] = json.dumps(doc_dict["structured_data"])
+
+    col_a, col_b, col_c, _ = st.columns([1, 1, 1, 2])
 
     with col_a:
         json_output = export([doc_dict], "json")
@@ -77,6 +78,23 @@ def render() -> None:
             data=txt_output,
             file_name=f"{doc.filename}.txt",
             mime="text/plain",
+        )
+
+    with col_c:
+        metadata = {
+            "filename": doc.filename,
+            "file_type": doc.file_type,
+            "file_size": doc.file_size,
+            "doc_type": doc.doc_type,
+            "processing_status": doc.processing_status,
+            "processing_time": doc.processing_time,
+            "created_at": doc.created_at,
+        }
+        st.download_button(
+            "Download Metadata",
+            data=json.dumps(metadata, indent=2),
+            file_name=f"{doc.filename}_metadata.json",
+            mime="application/json",
         )
 
     if st.button("Delete Document", type="primary"):
