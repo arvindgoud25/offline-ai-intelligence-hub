@@ -135,7 +135,7 @@ def render() -> None:
         c1.write(f":page_facing_up: {doc.filename}")
         c2.write(f":label: {file_type}")
         c3.write(f":floppy_disk: {format_file_size(file_size)}")
-        c1.write(f":stopwatch: {processing_time:.2f}s")
+        c1.write(f":stopwatch: {total_time:.2f}s")
         c2.write(f":white_check_mark: Status: Complete")
         c3.write(f":calendar: {doc.created_at[:10]}")
 

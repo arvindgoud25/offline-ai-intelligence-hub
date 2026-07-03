@@ -1,0 +1,60 @@
+John Doe
+
+Email: john.doe@example.com
+Phone: +91 9876543210
+Location: Hyderabad, India
+
+Professional Summary:
+Python developer with experience in Machine Learning, Data Analysis, and AI applications. Passionate about building offline AI systems and document intelligence platforms.
+
+Education:
+Bachelor of Technology in Computer Science
+ABC University
+2022 - 2026
+CGPA: 8.8
+
+Technical Skills:
+- Python
+- Java
+- SQL
+- Streamlit
+- Docker
+- Git
+- Machine Learning
+- SQLite
+- Linux
+
+Projects:
+1. Offline AI Intelligence Hub
+   - Built an offline-first AI application using Streamlit.
+   - Implemented OCR, document ingestion, and structured data extraction.
+   - Stored processed documents in SQLite.
+
+2. Multimodal RAG Chatbot
+   - Built a Retrieval-Augmented Generation chatbot.
+   - Supported PDF ingestion and semantic search.
+
+Experience:
+AI Intern
+XYZ Technologies
+May 2026 - July 2026
+
+Responsibilities:
+- Developed AI-powered document processing tools.
+- Optimized CPU-based inference pipelines.
+- Improved OCR accuracy.
+
+Certifications:
+- Python Programming
+- Machine Learning Fundamentals
+- Docker Essentials
+
+Languages:
+English
+Hindi
+Telugu
+
+Interests:
+Artificial Intelligence
+Open Source
+Cloud Computing
