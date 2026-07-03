@@ -8,6 +8,7 @@ from ingestion.upload import save_uploaded_file, validate_file_size
 from processing.classifier import classify_document, get_schema_for_type
 from processing.cleaner import clean
 from processing.detector import detect_file_type, is_supported
+from llm.local_llm import get_backend_status
 from processing.processor import process_text
 from storage.database import insert_document
 from storage.models import Document
@@ -60,10 +61,10 @@ def render() -> None:
 
         st.write("Running AI model...")
         try:
-            structured = process_text(cleaned_text)
-        except NotImplementedError:
+            structured = process_text(cleaned_text, doc_type=doc_type, schema=schema)
+        except Exception as exc:
             structured = {}
-            st.warning("AI processing is not yet implemented. Staged as placeholder.")
+            st.warning(f"AI structuring failed: {exc}")
 
         processing_time = time.perf_counter() - start_time
 
@@ -92,7 +93,10 @@ def render() -> None:
         cols[0].markdown(":white_check_mark: File Uploaded")
         cols[1].markdown(":white_check_mark: Type Detected")
         cols[2].markdown(":white_check_mark: Text Extracted")
-        cols[3].markdown(":hourglass: Ready for AI Structuring")
+        if structured:
+            cols[3].markdown(":white_check_mark: AI Structured")
+        else:
+            cols[3].markdown(":hourglass: Ready for AI Structuring")
 
     # ------------------------------------------------------------------
     # 2. Document Details
@@ -118,14 +122,28 @@ def render() -> None:
                 st.json(schema)
 
     # ------------------------------------------------------------------
-    # 4. AI Structuring Placeholder
+    # 4. AI Structuring
     # ------------------------------------------------------------------
     with st.container(border=True):
         st.markdown("**AI Structuring**")
+        status = get_backend_status()
         c1, c2 = st.columns(2)
-        c1.metric("Status", "Ready")
-        c2.metric("Model", "Not configured")
-        st.code("Output: Structured JSON (Coming in this phase)")
+        if status["available"] and status["name"] != "None":
+            model_label = status["model"] or status["name"]
+            c1.success(f"Model: {model_label}")
+            c2.metric("Status", "Connected")
+        else:
+            c1.warning("Model: Ollama not detected")
+            c2.metric("Status", "Unavailable")
+            st.info(
+                "Install Ollama and pull a model to enable AI-powered structuring. "
+                "See the sidebar for instructions."
+            )
+        if structured:
+            with st.expander("Structured JSON Output", expanded=True):
+                st.json(structured)
+        else:
+            st.info("No structured data extracted.")
 
     # ------------------------------------------------------------------
     # 5. Text Statistics

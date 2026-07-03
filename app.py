@@ -1,6 +1,7 @@
 import streamlit as st
 
-from config import APP_TITLE, APP_ICON
+from config import APP_TITLE, APP_ICON, LLM_BACKEND, OLLAMA_MODEL
+from llm.local_llm import load_model
 from storage.database import init_db
 from ui.components.sidebar import render_sidebar
 
@@ -11,6 +12,7 @@ st.set_page_config(
 )
 
 init_db()
+load_model(LLM_BACKEND, OLLAMA_MODEL)
 render_sidebar()
 
 pages = {

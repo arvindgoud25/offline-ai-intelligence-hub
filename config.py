@@ -48,3 +48,7 @@ DEFAULT_CLEANING_PRESET = "normal"
 MAX_UPLOAD_SIZE_MB = 50
 APP_TITLE = "Offline AI Intelligence Hub"
 APP_ICON = "🧠"
+
+# LLM backend configuration
+LLM_BACKEND = "ollama"
+OLLAMA_MODEL = "llama3.2"

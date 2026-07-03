@@ -7,6 +7,7 @@ from schemas import DOCUMENT_SCHEMAS
 class LLMBackend:
     name: str = ""
     available: bool = False
+    model: str = ""
 
     def load(self) -> None:
         raise NotImplementedError
@@ -15,10 +16,23 @@ class LLMBackend:
         raise NotImplementedError
 
 
+class NoneBackend(LLMBackend):
+    name = "None"
+
+    def __init__(self) -> None:
+        self.available = True
+
+    def load(self) -> None:
+        self.available = True
+
+    def generate(self, prompt: str) -> str:
+        return "{}"
+
+
 class OllamaBackend(LLMBackend):
     name = "Ollama"
 
-    def __init__(self, model: str = "llama3") -> None:
+    def __init__(self, model: str = "llama3.2") -> None:
         self.model = model
 
     def load(self) -> None:
@@ -31,8 +45,8 @@ class OllamaBackend(LLMBackend):
 
     def generate(self, prompt: str) -> str:
         import ollama
-        resp = ollama.generate(model=self.model, prompt=prompt)
-        return resp.get("response", "")
+        resp = ollama.generate(model=self.model, prompt=prompt, options={"num_predict": 2048, "temperature": 0.1})
+        return resp.response or ""
 
 
 class LlamaCppBackend(LLMBackend):
@@ -57,29 +71,47 @@ class LlamaCppBackend(LLMBackend):
 _backend: LLMBackend | None = None
 
 
-def get_available_backends() -> list[LLMBackend]:
-    backends: list[LLMBackend] = []
+def get_available_backends() -> list[dict[str, Any]]:
+    backends: list[dict[str, Any]] = []
     try:
         ob = OllamaBackend()
         ob.load()
-        backends.append(ob)
+        if ob.available:
+            backends.append({"name": "Ollama", "available": True, "model": ob.model, "object": ob})
     except Exception:
         pass
+    backends.append({"name": "None", "available": True, "model": "", "object": NoneBackend()})
     return backends
 
 
-def load_model(backend: LLMBackend) -> None:
+def load_model(backend_name: str = "ollama", model: str = "llama3.2") -> None:
     global _backend
-    backend.load()
-    _backend = backend
+    if backend_name == "ollama":
+        ob = OllamaBackend(model=model)
+        ob.load()
+        if ob.available:
+            _backend = ob
+            return
+    _backend = NoneBackend()
+    _backend.load()
 
 
 def is_ready() -> bool:
-    return _backend is not None and _backend.available
+    return _backend is not None and _backend.available and _backend.name != "None"
 
 
 def get_active_backend() -> LLMBackend | None:
     return _backend
+
+
+def get_backend_status() -> dict[str, Any]:
+    if _backend is None:
+        return {"name": "Not loaded", "available": False, "model": ""}
+    return {
+        "name": _backend.name,
+        "available": _backend.available,
+        "model": _backend.model if hasattr(_backend, "model") else "",
+    }
 
 
 def generate_structured_json(
