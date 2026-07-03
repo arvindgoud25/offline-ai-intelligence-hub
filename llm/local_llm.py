@@ -1,7 +1,7 @@
+import json
 from typing import Any
 
 from llm.prompts import DOCUMENT_PROMPTS, GENERIC_EXTRACTION_PROMPT
-from schemas import DOCUMENT_SCHEMAS
 
 
 class LLMBackend:
@@ -38,14 +38,19 @@ class OllamaBackend(LLMBackend):
     def load(self) -> None:
         try:
             import ollama
-            ollama.list()
-            self.available = True
+            resp = ollama.list()
+            self.available = any(m.model == self.model or m.model.startswith(self.model + ":") for m in (resp.models or []))
         except Exception:
             self.available = False
 
     def generate(self, prompt: str) -> str:
         import ollama
-        resp = ollama.generate(model=self.model, prompt=prompt, options={"num_predict": 2048, "temperature": 0.1})
+        resp = ollama.generate(
+            model=self.model,
+            prompt=prompt,
+            format="json",
+            options={"num_predict": 2048, "temperature": 0.1},
+        )
         return resp.response or ""
 
 
@@ -122,14 +127,21 @@ def generate_structured_json(
     if not is_ready():
         raise RuntimeError("No LLM backend is loaded and ready.")
     prompt = DOCUMENT_PROMPTS.get(doc_type, GENERIC_EXTRACTION_PROMPT)
+    if schema:
+        prompt += f"\n\nExpected JSON structure:\n{json.dumps(schema, indent=2)}"
     full_prompt = f"{prompt}\n\nText:\n{text}"
-    response = _backend.generate(full_prompt)
-    import json
+    try:
+        response = _backend.generate(full_prompt)
+    except Exception:
+        return {}
     try:
         return json.loads(response)
     except json.JSONDecodeError:
         import re
         match = re.search(r"\{.*\}", response, re.DOTALL)
         if match:
-            return json.loads(match.group())
-        raise ValueError("LLM output could not be parsed as JSON.")
+            try:
+                return json.loads(match.group())
+            except json.JSONDecodeError:
+                return {}
+        return {}

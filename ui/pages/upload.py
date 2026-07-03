@@ -122,31 +122,7 @@ def render() -> None:
                 st.json(schema)
 
     # ------------------------------------------------------------------
-    # 4. AI Structuring
-    # ------------------------------------------------------------------
-    with st.container(border=True):
-        st.markdown("**AI Structuring**")
-        status = get_backend_status()
-        c1, c2 = st.columns(2)
-        if status["available"] and status["name"] != "None":
-            model_label = status["model"] or status["name"]
-            c1.success(f"Model: {model_label}")
-            c2.metric("Status", "Connected")
-        else:
-            c1.warning("Model: Ollama not detected")
-            c2.metric("Status", "Unavailable")
-            st.info(
-                "Install Ollama and pull a model to enable AI-powered structuring. "
-                "See the sidebar for instructions."
-            )
-        if structured:
-            with st.expander("Structured JSON Output", expanded=True):
-                st.json(structured)
-        else:
-            st.info("No structured data extracted.")
-
-    # ------------------------------------------------------------------
-    # 5. Text Statistics
+    # 4. Text Statistics
     # ------------------------------------------------------------------
     stats = compute_text_stats(cleaned_text)
     with st.container(border=True):
@@ -157,7 +133,7 @@ def render() -> None:
         c3.metric("Lines", f"{stats['lines']:,}")
 
     # ------------------------------------------------------------------
-    # 6. Extracted Text (collapsible, copyable, formatting preserved)
+    # 5. Extracted Text (collapsible, copyable, formatting preserved)
     # ------------------------------------------------------------------
     with st.expander("Extracted Text", expanded=False):
         st.caption("Select all and copy (Ctrl+A, Ctrl+C)")
@@ -167,3 +143,24 @@ def render() -> None:
             height=300,
             key="extracted_text_display",
         )
+
+    # ------------------------------------------------------------------
+    # 6. AI Structuring
+    # ------------------------------------------------------------------
+    with st.container(border=True):
+        st.markdown("**AI Structuring**")
+        backend_status = get_backend_status()
+        c1, c2 = st.columns(2)
+        if backend_status["available"] and backend_status["name"] != "None":
+            model_label = backend_status["model"] or backend_status["name"]
+            c1.success(f"Model: {model_label}")
+            c2.metric("Status", "Connected")
+        else:
+            c1.warning("Model: Ollama not detected")
+            c2.metric("Status", "Unavailable")
+            st.info("Structured extraction unavailable. Local model not running.")
+        if structured:
+            with st.expander("Structured JSON Output", expanded=True):
+                st.json(structured)
+        else:
+            st.info("No structured data extracted.")
