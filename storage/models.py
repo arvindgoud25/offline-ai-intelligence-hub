@@ -15,6 +15,7 @@ class Document:
     cleaned_text: str = ""
     structured_data: dict[str, Any] = field(default_factory=dict)
     processing_time: float = 0.0
+    performance_metrics: dict[str, Any] = field(default_factory=dict)
     created_at: str = field(
         default_factory=lambda: datetime.now(timezone.utc).isoformat()
     )
