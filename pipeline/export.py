@@ -12,8 +12,9 @@ def to_csv(records: list[dict]) -> str:
     if not records:
         return ""
 
+    fieldnames = list(dict.fromkeys(k for r in records for k in r))
     output = StringIO()
-    writer = csv.DictWriter(output, fieldnames=list(records[0].keys()))
+    writer = csv.DictWriter(output, fieldnames=fieldnames, extrasaction="ignore")
     writer.writeheader()
     writer.writerows(records)
     return output.getvalue()
@@ -24,10 +25,19 @@ def to_jsonl(records: list[dict]) -> str:
     return "\n".join(lines)
 
 
+def to_txt(records: list[dict]) -> str:
+    parts: list[str] = []
+    for r in records:
+        text = r.get("cleaned_text") or r.get("raw_text") or ""
+        parts.append(f"--- {r.get('filename', 'unknown')} ---\n{text}\n")
+    return "\n".join(parts)
+
+
 FORMATS = {
     "json": to_json,
     "csv": to_csv,
     "jsonl": to_jsonl,
+    "txt": to_txt,
 }
 
 

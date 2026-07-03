@@ -1,8 +1,30 @@
 import streamlit as st
 
 from pipeline.export import export, FORMATS
-from storage.database import search_documents_filtered
-from utils.helpers import format_file_size, truncate_text
+from storage.database import get_all_documents, search_documents_filtered
+from utils.helpers import format_file_size
+
+
+def _doc_to_dict(doc: Any) -> dict:
+    d = doc.__dict__.copy()
+    if isinstance(d.get("structured_data"), dict):
+        d["structured_data"] = __import__("json").dumps(d["structured_data"])
+    return d
+
+
+def _render_export_ui(records: list, scope_label: str) -> None:
+    if not records:
+        return
+    fmt = st.selectbox(f"Export format ({scope_label})", list(FORMATS.keys()), key=f"fmt_{scope_label}")
+    if st.button(f"Export {scope_label}", key=f"btn_{scope_label}"):
+        data = [_doc_to_dict(r) for r in records]
+        output = export(data, fmt)
+        st.download_button(
+            label=f"Download as {fmt.upper()}",
+            data=output,
+            file_name=f"{scope_label.lower().replace(' ', '_')}.{fmt}",
+            mime="text/plain",
+        )
 
 
 def render() -> None:
@@ -65,13 +87,7 @@ def render() -> None:
 """
                     )
 
-    fmt = st.selectbox("Export format", list(FORMATS.keys()))
-    if st.button("Export"):
-        data = [r.__dict__ for r in records]
-        output = export(data, fmt)
-        st.download_button(
-            label=f"Download as {fmt.upper()}",
-            data=output,
-            file_name=f"export.{fmt}",
-            mime="text/plain",
-        )
+    st.markdown("---")
+    _render_export_ui(records, "Search Results")
+    all_docs = get_all_documents()
+    _render_export_ui(all_docs, "All Documents")

@@ -144,6 +144,17 @@ def search_documents_filtered(
         return [_row_to_doc(r) for r in rows]
 
 
+def get_all_documents(limit: int = 0) -> list[Document]:
+    sql = "SELECT * FROM documents ORDER BY created_at DESC"
+    params: list[Any] = []
+    if limit > 0:
+        sql += " LIMIT ?"
+        params.append(limit)
+    with get_connection() as conn:
+        rows = conn.execute(sql, params).fetchall()
+        return [_row_to_doc(r) for r in rows]
+
+
 def get_document(doc_id: int) -> Document | None:
     with get_connection() as conn:
         row = conn.execute(
