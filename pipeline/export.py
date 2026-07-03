@@ -1,7 +1,6 @@
 import csv
 import json
 from io import StringIO
-from typing import Any
 
 
 def to_json(records: list[dict], indent: int = 2) -> str:

@@ -1,8 +1,6 @@
 import streamlit as st
-import json
 
 from storage.database import get_analytics
-from utils.helpers import format_file_size
 
 
 def render() -> None:

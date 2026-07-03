@@ -54,39 +54,7 @@ class OllamaBackend(LLMBackend):
         return resp.response or ""
 
 
-class LlamaCppBackend(LLMBackend):
-    name = "llama.cpp"
-
-    def __init__(self, model_path: str = "") -> None:
-        self.model_path = model_path
-
-    def load(self) -> None:
-        try:
-            from llama_cpp import Llama
-            self._model = Llama(model_path=self.model_path)
-            self.available = True
-        except Exception:
-            self.available = False
-
-    def generate(self, prompt: str) -> str:
-        resp = self._model(prompt, max_tokens=2048)
-        return resp["choices"][0]["text"]
-
-
 _backend: LLMBackend | None = None
-
-
-def get_available_backends() -> list[dict[str, Any]]:
-    backends: list[dict[str, Any]] = []
-    try:
-        ob = OllamaBackend()
-        ob.load()
-        if ob.available:
-            backends.append({"name": "Ollama", "available": True, "model": ob.model, "object": ob})
-    except Exception:
-        pass
-    backends.append({"name": "None", "available": True, "model": "", "object": NoneBackend()})
-    return backends
 
 
 def load_model(backend_name: str = "ollama", model: str = "llama3.2") -> None:

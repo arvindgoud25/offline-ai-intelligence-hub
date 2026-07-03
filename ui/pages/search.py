@@ -1,3 +1,6 @@
+import json
+from typing import Any
+
 import streamlit as st
 
 from pipeline.export import export, FORMATS
@@ -8,7 +11,7 @@ from utils.helpers import format_file_size
 def _doc_to_dict(doc: Any) -> dict:
     d = doc.__dict__.copy()
     if isinstance(d.get("structured_data"), dict):
-        d["structured_data"] = __import__("json").dumps(d["structured_data"])
+        d["structured_data"] = json.dumps(d["structured_data"])
     return d
 
 
