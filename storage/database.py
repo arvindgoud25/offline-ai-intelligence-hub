@@ -111,6 +111,7 @@ def search_documents_filtered(
     doc_type_filter: str = "",
     file_type_filter: str = "",
     status_filter: str = "",
+    date_filter: str = "",
     limit: int = 50,
 ) -> list[Document]:
     conditions: list[str] = []
@@ -135,6 +136,10 @@ def search_documents_filtered(
     if status_filter:
         conditions.append("processing_status = ?")
         params.append(status_filter)
+
+    if date_filter:
+        conditions.append("created_at LIKE ?")
+        params.append(f"{date_filter}%")
 
     where = ""
     if conditions:
