@@ -60,10 +60,14 @@ def render() -> None:
         schema = get_schema_for_type(doc_type)
 
         st.write("Running AI model...")
+        processing_status = "partial"
         try:
             structured = process_text(cleaned_text, doc_type=doc_type, schema=schema)
+            if structured:
+                processing_status = "complete"
         except Exception as exc:
             structured = {}
+            processing_status = "failed"
             st.warning(f"AI structuring failed: {exc}")
 
         processing_time = time.perf_counter() - start_time
@@ -73,6 +77,8 @@ def render() -> None:
             filename=uploaded_file.name,
             file_type=file_type,
             file_size=file_size,
+            doc_type=doc_type,
+            processing_status=processing_status,
             raw_text=raw_text,
             cleaned_text=cleaned_text,
             structured_data=structured,

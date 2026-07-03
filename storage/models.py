@@ -9,6 +9,8 @@ class Document:
     filename: str = ""
     file_type: str = ""
     file_size: int = 0
+    doc_type: str = ""
+    processing_status: str = ""
     raw_text: str = ""
     cleaned_text: str = ""
     structured_data: dict[str, Any] = field(default_factory=dict)

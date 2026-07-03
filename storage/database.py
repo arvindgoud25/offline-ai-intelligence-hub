@@ -1,5 +1,5 @@
+import json
 import sqlite3
-from datetime import datetime, timezone
 from typing import Any
 
 from config import DB_PATH
@@ -20,9 +20,11 @@ def init_db() -> None:
             """
             CREATE TABLE IF NOT EXISTS documents (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                filename TEXT NOT NULL,
+                filename TEXT NOT NULL DEFAULT '',
                 file_type TEXT NOT NULL DEFAULT '',
                 file_size INTEGER NOT NULL DEFAULT 0,
+                doc_type TEXT NOT NULL DEFAULT '',
+                processing_status TEXT NOT NULL DEFAULT '',
                 raw_text TEXT NOT NULL DEFAULT '',
                 cleaned_text TEXT NOT NULL DEFAULT '',
                 structured_data TEXT NOT NULL DEFAULT '{}',
@@ -31,27 +33,38 @@ def init_db() -> None:
             )
             """
         )
+        _migrate_add_column(conn, "doc_type", "TEXT NOT NULL DEFAULT ''")
+        _migrate_add_column(conn, "processing_status", "TEXT NOT NULL DEFAULT ''")
         conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_documents_created_at ON documents(created_at)"
         )
+
+
+def _migrate_add_column(conn: sqlite3.Connection, col: str, col_def: str) -> None:
+    try:
+        conn.execute(f"ALTER TABLE documents ADD COLUMN {col} {col_def}")
+    except sqlite3.OperationalError:
+        pass
 
 
 def insert_document(doc: Document) -> int:
     with get_connection() as conn:
         cur = conn.execute(
             """
-            INSERT INTO documents (filename, file_type, file_size, raw_text,
-                                   cleaned_text, structured_data, processing_time,
-                                   created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO documents (filename, file_type, file_size, doc_type,
+                                   processing_status, raw_text, cleaned_text,
+                                   structured_data, processing_time, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 doc.filename,
                 doc.file_type,
                 doc.file_size,
+                doc.doc_type,
+                doc.processing_status,
                 doc.raw_text,
                 doc.cleaned_text,
-                str(doc.structured_data),
+                json.dumps(doc.structured_data),
                 doc.processing_time,
                 doc.created_at,
             ),
@@ -65,11 +78,12 @@ def search_documents(query: str = "", limit: int = 50) -> list[Document]:
             rows = conn.execute(
                 """
                 SELECT * FROM documents
-                WHERE filename LIKE ? OR raw_text LIKE ? OR cleaned_text LIKE ?
+                WHERE filename LIKE ? OR doc_type LIKE ? OR raw_text LIKE ?
+                   OR cleaned_text LIKE ?
                 ORDER BY created_at DESC
                 LIMIT ?
                 """,
-                (f"%{query}%", f"%{query}%", f"%{query}%", limit),
+                (f"%{query}%", f"%{query}%", f"%{query}%", f"%{query}%", limit),
             ).fetchall()
         else:
             rows = conn.execute(
@@ -93,15 +107,32 @@ def delete_document(doc_id: int) -> bool:
         return cur.rowcount > 0
 
 
+def _load_structured_data(raw: str) -> dict[str, Any]:
+    try:
+        return json.loads(raw)
+    except (json.JSONDecodeError, TypeError):
+        pass
+    try:
+        import ast
+        result = ast.literal_eval(raw)
+        if isinstance(result, dict):
+            return result
+    except Exception:
+        pass
+    return {}
+
+
 def _row_to_doc(row: sqlite3.Row) -> Document:
     return Document(
         id=row["id"],
         filename=row["filename"],
         file_type=row["file_type"],
         file_size=row["file_size"],
+        doc_type=row["doc_type"] if "doc_type" in row.keys() else "",
+        processing_status=row["processing_status"] if "processing_status" in row.keys() else "",
         raw_text=row["raw_text"],
         cleaned_text=row["cleaned_text"],
-        structured_data=__import__("json").loads(row["structured_data"]),
+        structured_data=_load_structured_data(row["structured_data"]),
         processing_time=row["processing_time"],
         created_at=row["created_at"],
     )
