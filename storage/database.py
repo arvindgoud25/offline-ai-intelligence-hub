@@ -185,7 +185,9 @@ def get_analytics() -> dict[str, Any]:
         "documents_by_file_type": {},
         "documents_by_status": {},
         "avg_processing_time": 0.0,
+        "avg_extraction_time": 0.0,
         "total_characters": 0,
+        "most_common_doc_type": "N/A",
         "recent_uploads": [],
         "success_rate": 0.0,
     }
@@ -213,6 +215,18 @@ def get_analytics() -> dict[str, Any]:
 
         row = conn.execute("SELECT SUM(LENGTH(cleaned_text)) FROM documents").fetchone()
         result["total_characters"] = row[0] or 0
+
+        extract_times: list[float] = []
+        for r in conn.execute("SELECT performance_metrics FROM documents WHERE performance_metrics != '{}'").fetchall():
+            pm = _load_structured_data(r["performance_metrics"])
+            et = pm.get("extract_time", 0)
+            if et > 0:
+                extract_times.append(et)
+        if extract_times:
+            result["avg_extraction_time"] = round(sum(extract_times) / len(extract_times), 3)
+
+        if result["documents_by_type"]:
+            result["most_common_doc_type"] = max(result["documents_by_type"], key=result["documents_by_type"].get)
 
         for r in conn.execute(
             "SELECT filename, doc_type, created_at FROM documents ORDER BY created_at DESC LIMIT 10"
