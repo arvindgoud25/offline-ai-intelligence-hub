@@ -169,6 +169,61 @@ def delete_document(doc_id: int) -> bool:
         return cur.rowcount > 0
 
 
+def get_analytics() -> dict[str, Any]:
+    result: dict[str, Any] = {
+        "total_documents": 0,
+        "documents_by_type": {},
+        "documents_by_file_type": {},
+        "documents_by_status": {},
+        "avg_processing_time": 0.0,
+        "total_characters": 0,
+        "recent_uploads": [],
+        "success_rate": 0.0,
+    }
+    with get_connection() as conn:
+        row = conn.execute("SELECT COUNT(*) FROM documents").fetchone()
+        result["total_documents"] = row[0] or 0
+
+        for r in conn.execute(
+            "SELECT doc_type, COUNT(*) as cnt FROM documents WHERE doc_type != '' GROUP BY doc_type ORDER BY cnt DESC"
+        ).fetchall():
+            result["documents_by_type"][r["doc_type"]] = r["cnt"]
+
+        for r in conn.execute(
+            "SELECT file_type, COUNT(*) as cnt FROM documents WHERE file_type != '' GROUP BY file_type ORDER BY cnt DESC"
+        ).fetchall():
+            result["documents_by_file_type"][r["file_type"]] = r["cnt"]
+
+        for r in conn.execute(
+            "SELECT processing_status, COUNT(*) as cnt FROM documents WHERE processing_status != '' GROUP BY processing_status"
+        ).fetchall():
+            result["documents_by_status"][r["processing_status"]] = r["cnt"]
+
+        row = conn.execute("SELECT AVG(processing_time) FROM documents WHERE processing_time > 0").fetchone()
+        result["avg_processing_time"] = round(row[0] or 0.0, 2)
+
+        row = conn.execute("SELECT SUM(LENGTH(cleaned_text)) FROM documents").fetchone()
+        result["total_characters"] = row[0] or 0
+
+        for r in conn.execute(
+            "SELECT filename, doc_type, created_at FROM documents ORDER BY created_at DESC LIMIT 10"
+        ).fetchall():
+            result["recent_uploads"].append({
+                "filename": r["filename"],
+                "doc_type": r["doc_type"],
+                "created_at": r["created_at"],
+            })
+
+        total = result["total_documents"]
+        if total > 0:
+            complete = conn.execute(
+                "SELECT COUNT(*) FROM documents WHERE processing_status = 'complete'"
+            ).fetchone()[0] or 0
+            result["success_rate"] = round(complete / total * 100, 1)
+
+    return result
+
+
 def _load_structured_data(raw: str) -> dict[str, Any]:
     try:
         return json.loads(raw)

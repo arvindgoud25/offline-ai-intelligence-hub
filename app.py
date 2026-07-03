@@ -19,6 +19,7 @@ pages = {
     "Upload": "ui.pages.upload",
     "Search & Export": "ui.pages.search",
     "View Documents": "ui.pages.view",
+    "Analytics": "ui.pages.analytics",
 }
 
 choice = st.sidebar.radio("Navigation", list(pages.keys()))
