@@ -38,6 +38,15 @@ def init_db() -> None:
         conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_documents_created_at ON documents(created_at)"
         )
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_documents_doc_type ON documents(doc_type)"
+        )
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_documents_file_type ON documents(file_type)"
+        )
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_documents_status ON documents(processing_status)"
+        )
 
 
 def _migrate_add_column(conn: sqlite3.Connection, col: str, col_def: str) -> None:
@@ -90,6 +99,48 @@ def search_documents(query: str = "", limit: int = 50) -> list[Document]:
                 "SELECT * FROM documents ORDER BY created_at DESC LIMIT ?",
                 (limit,),
             ).fetchall()
+        return [_row_to_doc(r) for r in rows]
+
+
+def search_documents_filtered(
+    query: str = "",
+    doc_type_filter: str = "",
+    file_type_filter: str = "",
+    status_filter: str = "",
+    limit: int = 50,
+) -> list[Document]:
+    conditions: list[str] = []
+    params: list[Any] = []
+
+    if query:
+        conditions.append(
+            "(filename LIKE ? OR doc_type LIKE ? OR file_type LIKE ? "
+            "OR raw_text LIKE ? OR cleaned_text LIKE ? OR structured_data LIKE ?)"
+        )
+        like = f"%{query}%"
+        params.extend([like] * 6)
+
+    if doc_type_filter:
+        conditions.append("doc_type = ?")
+        params.append(doc_type_filter)
+
+    if file_type_filter:
+        conditions.append("file_type = ?")
+        params.append(file_type_filter)
+
+    if status_filter:
+        conditions.append("processing_status = ?")
+        params.append(status_filter)
+
+    where = ""
+    if conditions:
+        where = "WHERE " + " AND ".join(conditions)
+
+    sql = f"SELECT * FROM documents {where} ORDER BY created_at DESC LIMIT ?"
+    params.append(limit)
+
+    with get_connection() as conn:
+        rows = conn.execute(sql, params).fetchall()
         return [_row_to_doc(r) for r in rows]
 
 
