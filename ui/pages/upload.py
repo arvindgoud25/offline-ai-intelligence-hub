@@ -1,5 +1,6 @@
 import time
 
+import psutil
 import streamlit as st
 
 from config import SUPPORTED_EXTENSIONS
@@ -38,7 +39,9 @@ def render() -> None:
         st.error(f"Unsupported file type: {path.suffix}")
         return
 
-    start_time = time.perf_counter()
+    pipeline_start = time.perf_counter()
+    cpu_start = psutil.cpu_percent(interval=None)
+    mem_start = psutil.Process().memory_info().rss
 
     with st.status("Processing...", expanded=True) as status:
         st.write("Saving uploaded file...")
@@ -46,11 +49,13 @@ def render() -> None:
         file_size = len(uploaded_file.getbuffer())
 
         st.write("Extracting text...")
+        t0 = time.perf_counter()
         try:
             raw_text = extract_text(path)
         except (NotImplementedError, ImportError, RuntimeError, ValueError) as exc:
             st.error(str(exc))
             return
+        extract_time = time.perf_counter() - t0
 
         st.write("Cleaning text...")
         cleaned_text = clean(raw_text)
@@ -61,6 +66,8 @@ def render() -> None:
 
         st.write("Running AI model...")
         processing_status = "partial"
+        llm_time = 0.0
+        t1 = time.perf_counter()
         try:
             structured = process_text(cleaned_text, doc_type=doc_type, schema=schema)
             if structured:
@@ -69,8 +76,22 @@ def render() -> None:
             structured = {}
             processing_status = "failed"
             st.warning(f"AI structuring failed: {exc}")
+        llm_time = time.perf_counter() - t1
 
-        processing_time = time.perf_counter() - start_time
+        total_time = time.perf_counter() - pipeline_start
+        cpu_peak = psutil.cpu_percent(interval=None)
+        mem_used = psutil.Process().memory_info().rss - mem_start
+
+        ocr_time = extract_time if file_type in ("image", "document") else 0.0
+
+        perf = {
+            "extract_time": round(extract_time, 3),
+            "llm_time": round(llm_time, 3),
+            "ocr_time": round(ocr_time, 3),
+            "total_time": round(total_time, 3),
+            "peak_cpu": cpu_peak,
+            "peak_memory_bytes": mem_used,
+        }
 
         st.write("Saving to database...")
         doc = Document(
@@ -82,7 +103,8 @@ def render() -> None:
             raw_text=raw_text,
             cleaned_text=cleaned_text,
             structured_data=structured,
-            processing_time=processing_time,
+            processing_time=total_time,
+            performance_metrics=perf,
         )
         doc_id = insert_document(doc)
 
@@ -170,3 +192,16 @@ def render() -> None:
                 st.json(structured)
         else:
             st.info("No structured data extracted.")
+
+    # ------------------------------------------------------------------
+    # 7. Performance Metrics
+    # ------------------------------------------------------------------
+    with st.container(border=True):
+        st.markdown("**Performance Metrics**")
+        c1, c2, c3, c4 = st.columns(4)
+        c1.metric("Extraction", f'{perf["extract_time"]:.2f}s')
+        c2.metric("LLM Inference", f'{perf["llm_time"]:.2f}s')
+        c3.metric("Total Pipeline", f'{perf["total_time"]:.2f}s')
+        c4.metric("Peak CPU", f'{perf["peak_cpu"]:.0f}%')
+        if perf["peak_memory_bytes"]:
+            st.caption(f"Memory delta: {format_file_size(perf['peak_memory_bytes'])}")

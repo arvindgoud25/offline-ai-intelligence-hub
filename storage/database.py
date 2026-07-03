@@ -29,12 +29,14 @@ def init_db() -> None:
                 cleaned_text TEXT NOT NULL DEFAULT '',
                 structured_data TEXT NOT NULL DEFAULT '{}',
                 processing_time REAL NOT NULL DEFAULT 0.0,
+                performance_metrics TEXT NOT NULL DEFAULT '{}',
                 created_at TEXT NOT NULL
             )
             """
         )
         _migrate_add_column(conn, "doc_type", "TEXT NOT NULL DEFAULT ''")
         _migrate_add_column(conn, "processing_status", "TEXT NOT NULL DEFAULT ''")
+        _migrate_add_column(conn, "performance_metrics", "TEXT NOT NULL DEFAULT '{}'")
         conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_documents_created_at ON documents(created_at)"
         )
@@ -62,8 +64,9 @@ def insert_document(doc: Document) -> int:
             """
             INSERT INTO documents (filename, file_type, file_size, doc_type,
                                    processing_status, raw_text, cleaned_text,
-                                   structured_data, processing_time, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                   structured_data, processing_time,
+                                   performance_metrics, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 doc.filename,
@@ -75,6 +78,7 @@ def insert_document(doc: Document) -> int:
                 doc.cleaned_text,
                 json.dumps(doc.structured_data),
                 doc.processing_time,
+                json.dumps(doc.performance_metrics),
                 doc.created_at,
             ),
         )
@@ -251,5 +255,6 @@ def _row_to_doc(row: sqlite3.Row) -> Document:
         cleaned_text=row["cleaned_text"],
         structured_data=_load_structured_data(row["structured_data"]),
         processing_time=row["processing_time"],
+        performance_metrics=_load_structured_data(row["performance_metrics"]),
         created_at=row["created_at"],
     )
