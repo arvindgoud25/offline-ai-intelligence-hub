@@ -4,6 +4,7 @@ import psutil
 import streamlit as st
 
 from config import SUPPORTED_EXTENSIONS
+from i18n.translator import tr
 from ingestion.extractor import extract_text
 from ingestion.upload import save_uploaded_file, validate_file_size
 from llm.local_llm import get_backend_status
@@ -17,37 +18,37 @@ from utils.helpers import compute_text_stats, format_file_size
 
 
 def render() -> None:
-    st.header("Upload Document")
-    st.caption("Supported files: " + ", ".join(SUPPORTED_EXTENSIONS))
+    st.header(tr("upload_document"))
+    st.caption(f"{tr('supported_files')}: " + ", ".join(SUPPORTED_EXTENSIONS))
 
     uploaded_file = st.file_uploader(
-        "Choose a file",
+        tr("choose_file"),
         type=list(SUPPORTED_EXTENSIONS.keys()),
     )
 
     if not uploaded_file:
-        st.info("Upload a file to begin processing.")
+        st.info(tr("upload_to_begin"))
         return
 
     if not validate_file_size(uploaded_file):
-        st.error("File exceeds the maximum upload size.")
+        st.error(tr("file_too_large"))
         return
 
     path = save_uploaded_file(uploaded_file)
 
     if not is_supported(path):
-        st.error(f"Unsupported file type: {path.suffix}")
+        st.error(f"{tr('unsupported_file')}: {path.suffix}")
         return
 
     pipeline_start = time.perf_counter()
     mem_start = psutil.Process().memory_info().rss
 
-    with st.status("Processing...", expanded=True) as status:
-        st.write("Saving uploaded file...")
+    with st.status(tr("processing"), expanded=True) as status:
+        st.write(tr("saving_uploaded_file"))
         file_type = detect_file_type(path)
         file_size = len(uploaded_file.getbuffer())
 
-        st.write("Extracting text...")
+        st.write(tr("extracting_text"))
         t0 = time.perf_counter()
         try:
             raw_text = extract_text(path)
@@ -56,14 +57,14 @@ def render() -> None:
             return
         extract_time = time.perf_counter() - t0
 
-        st.write("Cleaning text...")
+        st.write(tr("cleaning_text"))
         cleaned_text = clean(raw_text)
 
-        st.write("Classifying document type...")
+        st.write(tr("classifying_document"))
         doc_type, confidence = classify_document(cleaned_text)
         schema = get_schema_for_type(doc_type)
 
-        st.write("Running AI model...")
+        st.write(tr("running_ai"))
         processing_status = "partial"
         llm_time = 0.0
         t1 = time.perf_counter()
@@ -92,7 +93,7 @@ def render() -> None:
             "peak_memory_bytes": mem_used,
         }
 
-        st.write("Saving to database...")
+        st.write(tr("saving_database"))
         doc = Document(
             filename=uploaded_file.name,
             file_type=file_type,
@@ -107,9 +108,12 @@ def render() -> None:
         )
         doc_id = insert_document(doc)
 
-        status.update(label="Processing complete!", state="complete")
+        status.update(
+            label=tr("processing_complete"),
+            state="complete",
+        )
 
-    st.success(f"Document saved with ID: {doc_id}")
+    st.success(f"{tr('document_saved')}: {doc_id}")
 
     # ------------------------------------------------------------------
     # 1. Processing Pipeline

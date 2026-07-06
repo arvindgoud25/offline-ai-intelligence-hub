@@ -1,7 +1,18 @@
-streamlit>=1.35.0,<2.0.0
-PyMuPDF>=1.25.0,<2.0.0
-pytesseract>=0.3.10,<1.0.0
-Pillow>=10.0.0
-faster-whisper>=1.0.0,<2.0.0
-ollama>=0.4.0,<1.0.0
-psutil>=6.0.0,<7.0.0
+streamlit
+psutil
+
+# Local AI
+ollama
+
+# OCR
+Pillow
+pytesseract
+PyMuPDF
+
+# Speech
+faster-whisper
+ctranslate2
+
+# Utilities
+PyYAML
+requests
