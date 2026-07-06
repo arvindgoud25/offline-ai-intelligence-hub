@@ -28,8 +28,8 @@ test:
   stage: test
   script:
     - pytest
-    - coverage run -m pytest
-    - coverage report
+    - coverage run -m pytest -v
+    - coverage report -m
 
 security:
   stage: security
