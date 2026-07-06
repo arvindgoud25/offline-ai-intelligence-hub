@@ -1,6 +1,6 @@
 import streamlit as st
 
-from config import APP_ICON, APP_TITLE
+from config import APP_ICON, APP_TITLE, LLM_BACKEND
 from i18n.translator import (
     LANGUAGES,
     get_language,
@@ -28,15 +28,17 @@ def render_sidebar() -> None:
 
     st.sidebar.markdown("---")
 
-    status = get_backend_status()
+    # Show Ollama status only if enabled
+    if LLM_BACKEND == "ollama":
+        status = get_backend_status()
 
-    if status["available"] and status["name"] != "None":
-        model_label = status["model"] or status["name"]
-        st.sidebar.markdown(
-            f"**{tr('model')}:** {model_label} :green[{tr('connected')}]"
-        )
-    else:
-        st.sidebar.markdown(f"**{tr('model')}:** :orange[{tr('unavailable')}]")
-        st.sidebar.info(tr("install_ollama"))
+        if status["available"] and status["name"] != "None":
+            model_label = status["model"] or status["name"]
+            st.sidebar.markdown(
+                f"**{tr('model')}:** {model_label} :green[{tr('connected')}]"
+            )
+        else:
+            st.sidebar.markdown(f"**{tr('model')}:** :orange[{tr('unavailable')}]")
+            st.sidebar.info(tr("install_ollama"))
 
-    st.sidebar.markdown("---")
+        st.sidebar.markdown("---")

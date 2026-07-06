@@ -49,5 +49,5 @@ APP_TITLE = "Offline AI Intelligence Hub"
 APP_ICON = "🧠"
 
 # LLM backend configuration
-LLM_BACKEND = "ollama"
+LLM_BACKEND = "none"
 OLLAMA_MODEL = " "
