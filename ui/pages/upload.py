@@ -6,10 +6,10 @@ import streamlit as st
 from config import SUPPORTED_EXTENSIONS
 from ingestion.extractor import extract_text
 from ingestion.upload import save_uploaded_file, validate_file_size
+from llm.local_llm import get_backend_status
 from processing.classifier import classify_document, get_schema_for_type
 from processing.cleaner import clean
 from processing.detector import detect_file_type, is_supported
-from llm.local_llm import get_backend_status
 from processing.processor import process_text
 from storage.database import insert_document
 from storage.models import Document
@@ -40,7 +40,6 @@ def render() -> None:
         return
 
     pipeline_start = time.perf_counter()
-    cpu_start = psutil.cpu_percent(interval=None)
     mem_start = psutil.Process().memory_info().rss
 
     with st.status("Processing...", expanded=True) as status:
@@ -136,7 +135,7 @@ def render() -> None:
         c2.write(f":label: {file_type}")
         c3.write(f":floppy_disk: {format_file_size(file_size)}")
         c1.write(f":stopwatch: {total_time:.2f}s")
-        c2.write(f":white_check_mark: Status: Complete")
+        c2.write(":white_check_mark: Status: Complete")
         c3.write(f":calendar: {doc.created_at[:10]}")
 
     # ------------------------------------------------------------------
@@ -199,9 +198,9 @@ def render() -> None:
     with st.container(border=True):
         st.markdown("**Performance Metrics**")
         c1, c2, c3, c4 = st.columns(4)
-        c1.metric("Extraction", f'{perf["extract_time"]:.2f}s')
-        c2.metric("LLM Inference", f'{perf["llm_time"]:.2f}s')
-        c3.metric("Total Pipeline", f'{perf["total_time"]:.2f}s')
-        c4.metric("Peak CPU", f'{perf["peak_cpu"]:.0f}%')
+        c1.metric("Extraction", f"{perf['extract_time']:.2f}s")
+        c2.metric("LLM Inference", f"{perf['llm_time']:.2f}s")
+        c3.metric("Total Pipeline", f"{perf['total_time']:.2f}s")
+        c4.metric("Peak CPU", f"{perf['peak_cpu']:.0f}%")
         if perf["peak_memory_bytes"]:
             st.caption(f"Memory delta: {format_file_size(perf['peak_memory_bytes'])}")

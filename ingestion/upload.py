@@ -1,7 +1,7 @@
-from pathlib import Path
 import shutil
+from pathlib import Path
 
-from config import UPLOAD_DIR, MAX_UPLOAD_SIZE_MB
+from config import MAX_UPLOAD_SIZE_MB, UPLOAD_DIR
 
 
 def save_uploaded_file(uploaded_file) -> Path:

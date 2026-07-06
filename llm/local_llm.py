@@ -38,13 +38,18 @@ class OllamaBackend(LLMBackend):
     def load(self) -> None:
         try:
             import ollama
+
             resp = ollama.list()
-            self.available = any(m.model == self.model or m.model.startswith(self.model + ":") for m in (resp.models or []))
+            self.available = any(
+                m.model == self.model or m.model.startswith(self.model + ":")
+                for m in (resp.models or [])
+            )
         except Exception:
             self.available = False
 
     def generate(self, prompt: str) -> str:
         import ollama
+
         resp = ollama.generate(
             model=self.model,
             prompt=prompt,
@@ -106,6 +111,7 @@ def generate_structured_json(
         return json.loads(response)
     except json.JSONDecodeError:
         import re
+
         match = re.search(r"\{.*\}", response, re.DOTALL)
         if match:
             try:

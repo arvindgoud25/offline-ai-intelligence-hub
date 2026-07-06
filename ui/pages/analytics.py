@@ -14,10 +14,10 @@ def render() -> None:
 
     col1, col2, col3, col4, col5 = st.columns(5)
     col1.metric("Total Documents", data["total_documents"])
-    col2.metric("Avg Processing Time", f'{data["avg_processing_time"]:.2f}s')
-    col3.metric("Avg Extraction Time", f'{data["avg_extraction_time"]:.3f}s')
-    col4.metric("Total Characters", f'{data["total_characters"]:,}')
-    col5.metric("Success Rate", f'{data["success_rate"]}%')
+    col2.metric("Avg Processing Time", f"{data['avg_processing_time']:.2f}s")
+    col3.metric("Avg Extraction Time", f"{data['avg_extraction_time']:.3f}s")
+    col4.metric("Total Characters", f"{data['total_characters']:,}")
+    col5.metric("Success Rate", f"{data['success_rate']}%")
 
     st.markdown("---")
 
@@ -50,4 +50,6 @@ def render() -> None:
     if data["recent_uploads"]:
         st.markdown("**Recent Uploads**")
         for item in data["recent_uploads"]:
-            st.markdown(f"- {item['filename']}  —  *{item['doc_type'] or 'N/A'}*  ({item['created_at'][:10]})")
+            st.markdown(
+                f"- {item['filename']}  —  *{item['doc_type'] or 'N/A'}*  ({item['created_at'][:10]})"
+            )

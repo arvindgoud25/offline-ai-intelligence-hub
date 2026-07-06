@@ -166,9 +166,7 @@ def get_all_documents(limit: int = 0) -> list[Document]:
 
 def get_document(doc_id: int) -> Document | None:
     with get_connection() as conn:
-        row = conn.execute(
-            "SELECT * FROM documents WHERE id = ?", (doc_id,)
-        ).fetchone()
+        row = conn.execute("SELECT * FROM documents WHERE id = ?", (doc_id,)).fetchone()
         return _row_to_doc(row) if row else None
 
 
@@ -210,38 +208,51 @@ def get_analytics() -> dict[str, Any]:
         ).fetchall():
             result["documents_by_status"][r["processing_status"]] = r["cnt"]
 
-        row = conn.execute("SELECT AVG(processing_time) FROM documents WHERE processing_time > 0").fetchone()
+        row = conn.execute(
+            "SELECT AVG(processing_time) FROM documents WHERE processing_time > 0"
+        ).fetchone()
         result["avg_processing_time"] = round(row[0] or 0.0, 2)
 
         row = conn.execute("SELECT SUM(LENGTH(cleaned_text)) FROM documents").fetchone()
         result["total_characters"] = row[0] or 0
 
         extract_times: list[float] = []
-        for r in conn.execute("SELECT performance_metrics FROM documents WHERE performance_metrics != '{}'").fetchall():
+        for r in conn.execute(
+            "SELECT performance_metrics FROM documents WHERE performance_metrics != '{}'"
+        ).fetchall():
             pm = _load_structured_data(r["performance_metrics"])
             et = pm.get("extract_time", 0)
             if et > 0:
                 extract_times.append(et)
         if extract_times:
-            result["avg_extraction_time"] = round(sum(extract_times) / len(extract_times), 3)
+            result["avg_extraction_time"] = round(
+                sum(extract_times) / len(extract_times), 3
+            )
 
         if result["documents_by_type"]:
-            result["most_common_doc_type"] = max(result["documents_by_type"], key=result["documents_by_type"].get)
+            result["most_common_doc_type"] = max(
+                result["documents_by_type"], key=result["documents_by_type"].get
+            )
 
         for r in conn.execute(
             "SELECT filename, doc_type, created_at FROM documents ORDER BY created_at DESC LIMIT 10"
         ).fetchall():
-            result["recent_uploads"].append({
-                "filename": r["filename"],
-                "doc_type": r["doc_type"],
-                "created_at": r["created_at"],
-            })
+            result["recent_uploads"].append(
+                {
+                    "filename": r["filename"],
+                    "doc_type": r["doc_type"],
+                    "created_at": r["created_at"],
+                }
+            )
 
         total = result["total_documents"]
         if total > 0:
-            complete = conn.execute(
-                "SELECT COUNT(*) FROM documents WHERE processing_status = 'complete'"
-            ).fetchone()[0] or 0
+            complete = (
+                conn.execute(
+                    "SELECT COUNT(*) FROM documents WHERE processing_status = 'complete'"
+                ).fetchone()[0]
+                or 0
+            )
             result["success_rate"] = round(complete / total * 100, 1)
 
     return result
@@ -254,6 +265,7 @@ def _load_structured_data(raw: str) -> dict[str, Any]:
         pass
     try:
         import ast
+
         result = ast.literal_eval(raw)
         if isinstance(result, dict):
             return result
@@ -269,7 +281,9 @@ def _row_to_doc(row: sqlite3.Row) -> Document:
         file_type=row["file_type"],
         file_size=row["file_size"],
         doc_type=row["doc_type"] if "doc_type" in row.keys() else "",
-        processing_status=row["processing_status"] if "processing_status" in row.keys() else "",
+        processing_status=row["processing_status"]
+        if "processing_status" in row.keys()
+        else "",
         raw_text=row["raw_text"],
         cleaned_text=row["cleaned_text"],
         structured_data=_load_structured_data(row["structured_data"]),

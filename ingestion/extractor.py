@@ -29,8 +29,8 @@ def extract_text_from_pdf(path: Path) -> str:
 
 def extract_text_from_image(path: Path) -> str:
     try:
-        from PIL import Image
         import pytesseract
+        from PIL import Image
     except ImportError:
         raise ImportError(
             "Pillow and pytesseract are required for image OCR. "

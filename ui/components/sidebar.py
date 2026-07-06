@@ -1,6 +1,6 @@
 import streamlit as st
 
-from config import APP_TITLE, APP_ICON
+from config import APP_ICON, APP_TITLE
 from llm.local_llm import get_backend_status
 
 

@@ -3,7 +3,7 @@ import json
 import streamlit as st
 
 from pipeline.export import export
-from storage.database import get_document, delete_document, search_documents_filtered
+from storage.database import delete_document, get_document, search_documents_filtered
 from ui.components.file_info import render_file_info
 
 
@@ -11,16 +11,30 @@ def render() -> None:
     st.header("Document Details")
 
     c1, c2, c3, c4 = st.columns([2, 1, 1, 1])
-    query = c1.text_input("Search", placeholder="Filename, type, or text...", label_visibility="collapsed")
+    query = c1.text_input(
+        "Search", placeholder="Filename, type, or text...", label_visibility="collapsed"
+    )
     doc_type_filter = c2.selectbox(
-        "Type", ["", "Resume", "Invoice", "Medical Report", "Meeting Notes", "Research Paper", "General"],
+        "Type",
+        [
+            "",
+            "Resume",
+            "Invoice",
+            "Medical Report",
+            "Meeting Notes",
+            "Research Paper",
+            "General",
+        ],
         label_visibility="collapsed",
     )
     status_filter = c3.selectbox(
-        "Status", ["", "complete", "partial", "failed"],
+        "Status",
+        ["", "complete", "partial", "failed"],
         label_visibility="collapsed",
     )
-    date_filter = c4.text_input("Date", placeholder="YYYY-MM-DD", label_visibility="collapsed")
+    date_filter = c4.text_input(
+        "Date", placeholder="YYYY-MM-DD", label_visibility="collapsed"
+    )
 
     records = search_documents_filtered(
         query=query,

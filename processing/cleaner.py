@@ -14,7 +14,7 @@ def clean(text: str, preset: str | None = None) -> str:
         text = text.strip()
 
     if steps.get("remove_empty_lines"):
-        lines = [l for l in text.splitlines() if l.strip()]
+        lines = [line for line in text.splitlines() if line.strip()]
         text = "\n".join(lines)
 
     if steps.get("normalize_unicode"):

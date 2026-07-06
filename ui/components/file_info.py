@@ -5,7 +5,11 @@ from utils.helpers import format_file_size
 
 
 def _status_emoji(status: str) -> str:
-    return {"complete": ":green[Complete]", "partial": ":orange[Partial]", "failed": ":red[Failed]"}.get(status, status)
+    return {
+        "complete": ":green[Complete]",
+        "partial": ":orange[Partial]",
+        "failed": ":red[Failed]",
+    }.get(status, status)
 
 
 def render_file_info(doc: Document) -> None:

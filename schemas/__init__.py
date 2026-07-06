@@ -5,7 +5,10 @@ RESUME_SCHEMA = {
         "full_name": {"type": "string", "description": "Candidate's full name"},
         "email": {"type": "string", "description": "Email address"},
         "phone": {"type": "string", "description": "Phone number"},
-        "summary": {"type": "string", "description": "Professional summary or objective"},
+        "summary": {
+            "type": "string",
+            "description": "Professional summary or objective",
+        },
         "skills": {"type": "array", "items": "string", "description": "List of skills"},
         "experience": {
             "type": "array",
@@ -73,7 +76,11 @@ MEDICAL_REPORT_SCHEMA = {
         "report_date": {"type": "string", "description": "Date of the report"},
         "physician": {"type": "string", "description": "Attending physician name"},
         "diagnosis": {"type": "string", "description": "Primary diagnosis"},
-        "symptoms": {"type": "array", "items": "string", "description": "Reported symptoms"},
+        "symptoms": {
+            "type": "array",
+            "items": "string",
+            "description": "Reported symptoms",
+        },
         "findings": {"type": "string", "description": "Clinical findings"},
         "medications": {
             "type": "array",
@@ -87,7 +94,10 @@ MEDICAL_REPORT_SCHEMA = {
             },
             "description": "Prescribed medications",
         },
-        "notes": {"type": "string", "description": "Additional notes or recommendations"},
+        "notes": {
+            "type": "string",
+            "description": "Additional notes or recommendations",
+        },
     },
 }
 
@@ -97,14 +107,26 @@ MEETING_NOTES_SCHEMA = {
     "fields": {
         "title": {"type": "string", "description": "Meeting title or subject"},
         "date": {"type": "string", "description": "Meeting date"},
-        "attendees": {"type": "array", "items": "string", "description": "List of attendees"},
-        "agenda": {"type": "array", "items": "string", "description": "Agenda items discussed"},
+        "attendees": {
+            "type": "array",
+            "items": "string",
+            "description": "List of attendees",
+        },
+        "agenda": {
+            "type": "array",
+            "items": "string",
+            "description": "Agenda items discussed",
+        },
         "discussion_points": {
             "type": "array",
             "items": "string",
             "description": "Key discussion points",
         },
-        "decisions": {"type": "array", "items": "string", "description": "Decisions made"},
+        "decisions": {
+            "type": "array",
+            "items": "string",
+            "description": "Decisions made",
+        },
         "action_items": {
             "type": "array",
             "items": {
@@ -125,7 +147,11 @@ RESEARCH_PAPER_SCHEMA = {
     "description": "Extracted information from a research paper",
     "fields": {
         "title": {"type": "string", "description": "Paper title"},
-        "authors": {"type": "array", "items": "string", "description": "List of authors"},
+        "authors": {
+            "type": "array",
+            "items": "string",
+            "description": "List of authors",
+        },
         "abstract": {"type": "string", "description": "Paper abstract"},
         "keywords": {"type": "array", "items": "string", "description": "Keywords"},
         "sections": {
@@ -141,7 +167,11 @@ RESEARCH_PAPER_SCHEMA = {
         },
         "methodology": {"type": "string", "description": "Research methodology"},
         "conclusion": {"type": "string", "description": "Conclusion or findings"},
-        "references": {"type": "array", "items": "string", "description": "List of references"},
+        "references": {
+            "type": "array",
+            "items": "string",
+            "description": "List of references",
+        },
     },
 }
 

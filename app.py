@@ -1,6 +1,6 @@
 import streamlit as st
 
-from config import APP_TITLE, APP_ICON, LLM_BACKEND, OLLAMA_MODEL
+from config import APP_ICON, APP_TITLE, LLM_BACKEND, OLLAMA_MODEL
 from llm.local_llm import load_model
 from storage.database import init_db
 from ui.components.sidebar import render_sidebar
