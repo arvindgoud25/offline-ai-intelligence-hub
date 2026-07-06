@@ -405,45 +405,46 @@ SQLite Database
 
 # 📸 Application Screenshots
 
-## Home
+## 🏠 Home
 
 ![Home](docs/screenshots/home.png)
 
 ---
 
-## Upload
+## 📤 Upload Document
 
 ![Upload](docs/screenshots/upload.png)
 
 ---
 
-## Search
+## 🔍 Search
 
 ![Search](docs/screenshots/search.png)
 
 ---
 
-## Document Viewer
+## 📄 Document Viewer
 
 ![Document Viewer](docs/screenshots/document-viewer.png)
 
 ---
 
-## Analytics Dashboard
+## 📊 Analytics Dashboard
 
 ![Analytics](docs/screenshots/analytics-dashboard.png)
 
 ---
 
-## Language Selection
+## 🌍 Language Selection
 
 ![Language](docs/screenshots/language.png)
 
 ---
 
-## Theme Selection
+## 🎨 Theme Selection
 
 ![Theme](docs/screenshots/theme.png)
+
 ---
 
 # 🔮 Future Improvements
