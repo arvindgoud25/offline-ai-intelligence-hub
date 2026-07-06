@@ -1,183 +1,502 @@
-# Offline AI Intelligence Hub
+# 🧠 Offline AI Intelligence Hub
 
-Transform unstructured documents (PDFs, images, audio, text) into structured JSON — entirely offline, on CPU, using local LLMs.
+An **offline-first intelligent document processing system** built with **Streamlit** that extracts, classifies, analyzes, searches, and exports information from uploaded documents. The application is designed to work completely offline and supports OCR, document analytics, multilingual UI, and optional local AI inference using Ollama.
 
-## Features
+---
 
-- **100% Offline** — No cloud APIs, no data leaves your machine.
-- **CPU-Only** — Runs on consumer hardware; no GPU required.
-- **Multi-Format Ingestion** — Text (.txt, .csv, .json, .xml, .md), PDFs, images (OCR via Tesseract), and audio (transcription via Whisper).
-- **AI-Powered Structuring** — Uses Ollama-backed local LLMs to extract structured JSON from raw text. Five built-in document schemas: Resume, Invoice, Medical Report, Meeting Notes, Research Paper.
-- **Search & Filter** — Full-text search across documents with filters by document type, processing status, and date.
-- **Export** — Download individual documents or bulk-export in JSON, CSV, JSONL, or plain text format.
-- **Analytics Dashboard** — Visual insights: documents by type, file format, processing status, success/failure rates, average extraction time, and resource usage.
-- **Performance Metrics** — Per-stage timers (text extraction, LLM inference, total pipeline), peak CPU, and memory usage for every document.
+# ✨ Features
 
-## Architecture
+## 📂 Document Upload
 
-```
-                     ┌─────────────────────┐
-                     │   Streamlit UI (4 pages)
-                     │  Upload · Search & Export
-                     │  View Documents · Analytics
-                     └──────┬──────────────┘
-                            │
-                     ┌──────▼──────────────┐
-                     │   Document Pipeline  │
-                     │                     │
-                     │  File Upload        │
-                     │  Type Detection     │
-                     │  Text Extraction    │
-                     │  Text Cleaning      │
-                     │  Classification     │
-                     │  AI Structuring     │
-                     │  Database Storage   │
-                     └──────┬──────────────┘
-                            │
-              ┌─────────────┼─────────────┐
-              │             │             │
-       ┌──────▼─────┐ ┌────▼────┐ ┌──────▼──────┐
-       │  Ollama LLM │ │ SQLite  │ │  File Store  │
-       │ (or None)   │ │ (local) │ │  (uploads/)  │
-       └────────────┘ └─────────┘ └─────────────┘
-```
+- Upload multiple document formats
+- Automatic file type detection
+- File size validation
+- Secure local storage
 
-## Folder Structure
+Supported Formats
 
-```
-├── app.py                  # Streamlit entry point
-├── config.py               # App configuration & constants
-├── ingestion/              # File intake stage
-│   ├── upload.py           # File upload & size validation
-│   └── extractor.py        # Text extraction (PDF, images, audio, text)
-├── processing/             # Core processing stage
-│   ├── classifier.py       # Document type classification
-│   ├── cleaner.py          # Text cleaning & normalization
-│   ├── detector.py         # File type / MIME detection
-│   └── processor.py        # Orchestrates LLM call for structuring
-├── pipeline/               # Pipeline utilities
-│   └── export.py           # JSON / CSV / JSONL / TXT export
-├── llm/                    # LLM interface
-│   ├── local_llm.py        # OllamaBackend + NoneBackend fallback
-│   └── prompts.py          # Per-document-type extraction prompts
-├── schemas/                # JSON schemas per document type
-│   └── __init__.py
-├── storage/                # Persistence layer
-│   ├── database.py         # SQLite CRUD, search, analytics
-│   └── models.py           # Document dataclass
-├── utils/                  # Shared utilities
-│   └── helpers.py          # Text stats, file size formatting
-├── ui/                     # Streamlit UI
-│   ├── pages/
-│   │   ├── upload.py       # Upload & pipeline execution
-│   │   ├── search.py       # Search & bulk export
-│   │   ├── view.py         # Document detail viewer
-│   │   └── analytics.py    # Analytics dashboard
-│   └── components/
-│       ├── sidebar.py      # Model status indicator
-│       └── file_info.py    # File metadata component
-├── data/                   # Runtime data (gitignored)
-│   ├── uploads/            # Uploaded files
-│   └── storage.db          # SQLite database
-├── exports/                # Exported files (gitignored)
+- PDF
+- PNG
+- JPG
+- JPEG
+- TXT
+- DOCX
+- WAV
+- MP3
+
+---
+
+## 🔍 OCR & Text Extraction
+
+Automatically extracts text using:
+
+- PyMuPDF (PDF)
+- Tesseract OCR (Images)
+- Faster Whisper (Audio)
+
+---
+
+## 🧹 Text Processing
+
+- Text cleaning
+- Noise removal
+- Unicode normalization
+- Empty line removal
+
+---
+
+## 📑 Document Classification
+
+Automatically identifies document types such as:
+
+- Invoice
+- Resume
+- Medical Report
+- Meeting Notes
+- Research Paper
+- Generic Document
+
+---
+
+## 🤖 Offline AI Integration
+
+Supports:
+
+- Ollama
+- Llama 3.2
+
+Features:
+
+- Local inference
+- Structured JSON extraction
+- Graceful fallback when Ollama is unavailable
+- No cloud APIs
+
+---
+
+## 📊 Analytics Dashboard
+
+Provides insights including:
+
+- Total documents
+- Document types
+- File types
+- Processing status
+- Performance metrics
+- Recent uploads
+
+---
+
+## 🔎 Search
+
+Search documents by:
+
+- Filename
+- Document type
+- File type
+- Processing status
+- Keywords
+
+---
+
+## 📤 Export
+
+Export extracted information as:
+
+- JSON
+- CSV
+- TXT
+
+---
+
+## 🌍 Internationalization
+
+Supported Languages
+
+- 🇺🇸 English
+- 🇮🇳 Hindi
+- 🇮🇳 Telugu
+
+Only the application UI is translated.
+
+Uploaded document content remains unchanged.
+
+---
+
+## 🎨 Theme Support
+
+- Light
+- Dark
+- System
+
+User preference is remembered during the session.
+
+---
+
+## ⚡ Performance Metrics
+
+Tracks:
+
+- Extraction time
+- OCR time
+- AI inference time
+- Total pipeline time
+- CPU usage
+- Memory usage
+
+---
+
+# 🏗 Project Structure
+
+```text
+offline-ai-intelligence-hub/
+│
+├── app.py
+├── config.py
+├── schemas.py
+│
+├── ingestion/
+│   ├── extractor.py
+│   └── upload.py
+│
+├── processing/
+│   ├── cleaner.py
+│   ├── classifier.py
+│   ├── detector.py
+│   └── processor.py
+│
+├── storage/
+│   ├── database.py
+│   └── models.py
+│
+├── llm/
+│   ├── local_llm.py
+│   └── prompts.py
+│
+├── pipeline/
+│   └── export.py
+│
+├── ui/
+│   ├── components/
+│   └── pages/
+│
+├── utils/
+│
+├── i18n/
+│   ├── translator.py
+│   └── translations.py
+│
+├── tests/
+│
+├── uploads/
+├── exports/
 ├── requirements.txt
+├── requirements-dev.txt
+├── Dockerfile
+├── docker-compose.yml
+├── .gitlab-ci.yml
 └── README.md
 ```
 
-## Installation
+---
 
-### Prerequisites
+# 🛠 Technologies Used
 
-- Python 3.10+
-- Tesseract OCR (`pytesseract` — for image OCR support)
-- Ollama (optional — for AI structuring; see [Running with Ollama](#running-with-ollama))
+## Frontend
 
-### Setup
+- Streamlit
+
+## Backend
+
+- Python 3.13
+
+## Database
+
+- SQLite
+
+## OCR
+
+- PyMuPDF
+- Pillow
+- Tesseract OCR
+
+## Audio Processing
+
+- Faster Whisper
+
+## Local AI
+
+- Ollama
+- Llama 3.2
+
+## Development Tools
+
+- Ruff
+- Pre-commit
+- Pytest
+- Coverage
+- GitLab CI/CD
+
+---
+
+# 🚀 Installation
+
+## Clone Repository
 
 ```bash
-# Clone the repository
-git clone <repo-url>
+git clone <repository-url>
 cd offline-ai-intelligence-hub
-
-# Create a virtual environment
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Install Tesseract (Ubuntu/Debian)
-sudo apt install tesseract-ocr
-# On macOS: brew install tesseract
-# On Windows: download from https://github.com/UB-Mannheim/tesseract/wiki
 ```
 
-## Running Locally
+---
+
+## Create Virtual Environment
+
+```bash
+python -m venv venv
+```
+
+Linux/macOS
+
+```bash
+source venv/bin/activate
+```
+
+Windows
+
+```bash
+venv\Scripts\activate
+```
+
+---
+
+## Install Dependencies
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+---
+
+## Run Application
 
 ```bash
 streamlit run app.py
 ```
 
-Open http://localhost:8501 in your browser.
+---
 
-When running without Ollama, the app falls back to a `NoneBackend` — documents are ingested, classified, and stored, but structured data extraction is skipped. All other features (search, export, analytics) remain fully functional.
+# 🐳 Docker
 
-## Running with Ollama
+Build
 
-1. Install [Ollama](https://ollama.com) for your platform.
-2. Pull a model (default is `llama3.2`):
-   ```bash
-   ollama pull llama3.2
-   ```
-3. Start the Ollama service:
-   ```bash
-   ollama serve
-   ```
-4. Launch the app:
-   ```bash
-   streamlit run app.py
-   ```
-
-The sidebar will show a green **Connected** indicator when Ollama is detected. All uploaded documents will be automatically structured into JSON based on their detected type.
-
-### Changing the Model
-
-Edit `config.py`:
-
-```python
-OLLAMA_MODEL = "llama3.2"  # Change to any model pulled via Ollama
+```bash
+docker build -t offline-ai-intelligence-hub .
 ```
 
-## Screenshots
+Run
 
-<!-- TODO: Add screenshots -->
-<!-- Upload Page: pipeline stages, performance metrics -->
-<!-- Search & Export: filtered results, bulk export controls -->
-<!-- View Documents: file info, raw/cleaned/structured tabs, download buttons -->
-<!-- Analytics Dashboard: metric cards, bar charts, recent uploads -->
+```bash
+docker-compose up
+```
 
-## Technologies
+---
 
-| Component | Technology |
-|-----------|-----------|
-| Frontend  | Streamlit |
-| Backend   | Python 3.10+ |
-| Database  | SQLite (via `sqlite3`) |
-| OCR       | Tesseract (`pytesseract`) |
-| Audio     | Whisper (`faster-whisper`) |
-| LLM       | Ollama (local, CPU-only) |
-| PDF       | PyMuPDF (`fitz`) |
-| Monitoring| `psutil` |
+# 🧪 Testing
 
-## Future Improvements
+Run Ruff
 
-- Incremental processing (re-process only reprocessed documents)
-- Batch upload (multiple files at once)
-- File format conversion (markdown, HTML, etc.)
-- Model auto-download on first run
-- Multi-language OCR and transcription
-- Document comparison / diff view
-- Export with custom field selection
-- Dark/light theme toggle
-- User authentication for multi-user setups
-- REST API for headless operation
+```bash
+ruff check .
+```
+
+Format
+
+```bash
+ruff format .
+```
+
+Run Pre-commit
+
+```bash
+pre-commit run --all-files
+```
+
+Run Tests
+
+```bash
+pytest
+```
+
+Coverage
+
+```bash
+coverage run -m pytest
+coverage report
+```
+
+---
+
+# 🏛 Architecture
+
+```text
+User
+   │
+   ▼
+Upload Document
+   │
+   ▼
+File Validation
+   │
+   ▼
+Text Extraction
+(PDF / OCR / Audio)
+   │
+   ▼
+Text Cleaning
+   │
+   ▼
+Document Classification
+   │
+   ▼
+AI Structuring (Optional via Ollama)
+   │
+   ▼
+SQLite Storage
+   │
+   ├────────► Search
+   ├────────► Analytics
+   ├────────► Viewer
+   └────────► Export
+```
+
+---
+
+# 🔄 Offline AI Workflow
+
+```text
+Document
+      │
+      ▼
+OCR / Extraction
+      │
+      ▼
+Cleaning
+      │
+      ▼
+Classification
+      │
+      ▼
+Ollama Available?
+      │
+ ┌────┴────┐
+ │         │
+Yes       No
+ │         │
+ ▼         ▼
+AI JSON   Graceful Fallback
+ │         │
+ └────┬────┘
+      ▼
+SQLite Database
+```
+
+---
+
+# 📸 Application Screenshots
+
+## Home
+
+![Home](docs/screenshots/home.png)
+
+---
+
+## Upload
+
+![Upload](docs/screenshots/upload.png)
+
+---
+
+## Search
+
+![Search](docs/screenshots/search.png)
+
+---
+
+## Document Viewer
+
+![Document Viewer](docs/screenshots/document-viewer.png)
+
+---
+
+## Analytics Dashboard
+
+![Analytics](docs/screenshots/analytics-dashboard.png)
+
+---
+
+## Language Selection
+
+![Language](docs/screenshots/language.png)
+
+---
+
+## Theme Selection
+
+![Theme](docs/screenshots/theme.png)
+---
+
+# 🔮 Future Improvements
+
+- Chat with uploaded documents
+- Semantic vector search
+- RAG pipeline
+- Batch document processing
+- Local embeddings
+- Multi-user authentication
+- Role-based access
+- Offline summarization
+- Document comparison
+- Voice interaction
+
+---
+
+# 🤝 Contributing
+
+1. Fork the repository
+
+2. Create a feature branch
+
+```bash
+git checkout -b feature/new-feature
+```
+
+3. Commit changes
+
+```bash
+git commit -m "Add new feature"
+```
+
+4. Push changes
+
+```bash
+git push origin feature/new-feature
+```
+
+5. Create a Merge Request
+
+---
+
+# 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+# 👨‍💻 Author
+
+**T V S K Gautham Sainath Tilak & G Aravind kumar Goud**
+
+CSE (AI & ML)
+
+Offline AI Intelligence Hub – Hackathon Project
