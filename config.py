@@ -50,4 +50,4 @@ APP_ICON = "🧠"
 
 # LLM backend configuration
 LLM_BACKEND = "ollama"
-OLLAMA_MODEL = "llama3.2"
+OLLAMA_MODEL = " "
