@@ -2,20 +2,23 @@ import json
 
 import streamlit as st
 
+from i18n.translator import tr
 from pipeline.export import export
 from storage.database import delete_document, get_document, search_documents_filtered
 from ui.components.file_info import render_file_info
 
 
 def render() -> None:
-    st.header("Document Details")
+    st.header(tr("view_documents_header"))
 
     c1, c2, c3, c4 = st.columns([2, 1, 1, 1])
     query = c1.text_input(
-        "Search", placeholder="Filename, type, or text...", label_visibility="collapsed"
+        tr("search"),
+        placeholder=tr("search_placeholder"),
+        label_visibility="collapsed",
     )
     doc_type_filter = c2.selectbox(
-        "Type",
+        tr("type_filter"),
         [
             "",
             "Resume",
@@ -28,12 +31,14 @@ def render() -> None:
         label_visibility="collapsed",
     )
     status_filter = c3.selectbox(
-        "Status",
+        tr("status_filter"),
         ["", "complete", "partial", "failed"],
         label_visibility="collapsed",
     )
     date_filter = c4.text_input(
-        "Date", placeholder="YYYY-MM-DD", label_visibility="collapsed"
+        tr("date_filter"),
+        placeholder=tr("date_placeholder"),
+        label_visibility="collapsed",
     )
 
     records = search_documents_filtered(
@@ -45,27 +50,29 @@ def render() -> None:
     )
 
     if not records:
-        st.info("No documents found matching your filters.")
+        st.info(tr("no_documents_found"))
         return
 
     options = {f"{r.id} — {r.filename} ({r.created_at[:10]})": r.id for r in records}
-    selected_label = st.selectbox("Select a document", list(options.keys()))
+    selected_label = st.selectbox(tr("select_document"), list(options.keys()))
     doc_id = options[selected_label]
 
     doc = get_document(doc_id)
     if not doc:
-        st.error("Document not found.")
+        st.error(tr("document_not_found"))
         return
 
     render_file_info(doc)
 
-    tab1, tab2, tab3 = st.tabs(["Raw Text", "Cleaned Text", "Structured Data"])
+    tab1, tab2, tab3 = st.tabs(
+        [tr("raw_text_tab"), tr("cleaned_text_tab"), tr("structured_data_tab")]
+    )
 
     with tab1:
-        st.text(doc.raw_text[:5000] if doc.raw_text else "(empty)")
+        st.text(doc.raw_text[:5000] if doc.raw_text else tr("empty_text"))
 
     with tab2:
-        st.text(doc.cleaned_text[:5000] if doc.cleaned_text else "(empty)")
+        st.text(doc.cleaned_text[:5000] if doc.cleaned_text else tr("empty_text"))
 
     with tab3:
         st.json(doc.structured_data if doc.structured_data else {})
@@ -79,7 +86,7 @@ def render() -> None:
     with col_a:
         json_output = export([doc_dict], "json")
         st.download_button(
-            "Download JSON",
+            tr("download_json"),
             data=json_output,
             file_name=f"{doc.filename}.json",
             mime="application/json",
@@ -88,7 +95,7 @@ def render() -> None:
     with col_b:
         txt_output = export([doc_dict], "txt")
         st.download_button(
-            "Download TXT",
+            tr("download_txt"),
             data=txt_output,
             file_name=f"{doc.filename}.txt",
             mime="text/plain",
@@ -105,12 +112,12 @@ def render() -> None:
             "created_at": doc.created_at,
         }
         st.download_button(
-            "Download Metadata",
+            tr("download_metadata"),
             data=json.dumps(metadata, indent=2),
             file_name=f"{doc.filename}_metadata.json",
             mime="application/json",
         )
 
-    if st.button("Delete Document", type="primary"):
+    if st.button(tr("delete_document"), type="primary"):
         delete_document(doc_id)
         st.rerun()

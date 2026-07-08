@@ -121,19 +121,19 @@ def render() -> None:
     with st.container(border=True):
         st.markdown("**Processing Pipeline**")
         cols = st.columns(4)
-        cols[0].markdown(":white_check_mark: File Uploaded")
-        cols[1].markdown(":white_check_mark: Type Detected")
-        cols[2].markdown(":white_check_mark: Text Extracted")
+        cols[0].markdown(f":white_check_mark: {tr('file_uploaded_step')}")
+        cols[1].markdown(f":white_check_mark: {tr('type_detected_step')}")
+        cols[2].markdown(f":white_check_mark: {tr('text_extracted_step')}")
         if structured:
-            cols[3].markdown(":white_check_mark: AI Structured")
+            cols[3].markdown(f":white_check_mark: {tr('ai_structured_step')}")
         else:
-            cols[3].markdown(":hourglass: Ready for AI Structuring")
+            cols[3].markdown(f":hourglass: {tr('ready_for_ai_structuring_step')}")
 
     # ------------------------------------------------------------------
     # 2. Document Details
     # ------------------------------------------------------------------
     with st.container(border=True):
-        st.markdown("**Document Details**")
+        st.markdown(f"**{tr('document_details')}**")
         c1, c2, c3 = st.columns(3)
         c1.write(f":page_facing_up: {doc.filename}")
         c2.write(f":label: {file_type}")
@@ -146,10 +146,10 @@ def render() -> None:
     # 3. Document Classification
     # ------------------------------------------------------------------
     with st.container(border=True):
-        st.markdown("**Document Classification**")
+        st.markdown(f"**{tr('document_classification')}**")
         st.info(f"**Detected type:** {doc_type}  _(confidence: {confidence:.0%})_")
         if schema:
-            with st.expander("Selected JSON Schema"):
+            with st.expander(tr("selected_json_schema")):
                 st.json(schema)
 
     # ------------------------------------------------------------------
@@ -157,19 +157,19 @@ def render() -> None:
     # ------------------------------------------------------------------
     stats = compute_text_stats(cleaned_text)
     with st.container(border=True):
-        st.markdown("**Text Statistics**")
+        st.markdown(f"**{tr('text_statistics')}**")
         c1, c2, c3 = st.columns(3)
-        c1.metric("Characters", f"{stats['characters']:,}")
-        c2.metric("Words", f"{stats['words']:,}")
-        c3.metric("Lines", f"{stats['lines']:,}")
+        c1.metric(tr("characters"), f"{stats['characters']:,}")
+        c2.metric(tr("words"), f"{stats['words']:,}")
+        c3.metric(tr("lines"), f"{stats['lines']:,}")
 
     # ------------------------------------------------------------------
     # 5. Extracted Text (collapsible, copyable, formatting preserved)
     # ------------------------------------------------------------------
-    with st.expander("Extracted Text", expanded=False):
-        st.caption("Select all and copy (Ctrl+A, Ctrl+C)")
+    with st.expander(tr("extracted_text"), expanded=False):
+        st.caption(tr("select_all_copy"))
         st.text_area(
-            label="Extracted content",
+            label=tr("extracted_content"),
             value=cleaned_text,
             height=300,
             key="extracted_text_display",
@@ -179,32 +179,32 @@ def render() -> None:
     # 6. AI Structuring
     # ------------------------------------------------------------------
     with st.container(border=True):
-        st.markdown("**AI Structuring**")
+        st.markdown(f"**{tr('ai_structuring')}**")
         backend_status = get_backend_status()
         c1, c2 = st.columns(2)
         if backend_status["available"] and backend_status["name"] != "None":
             model_label = backend_status["model"] or backend_status["name"]
-            c1.success(f"Model: {model_label}")
-            c2.metric("Status", "Connected")
+            c1.success(f"{tr('model_label')}: {model_label}")
+            c2.metric(tr("status"), tr("connected"))
         else:
-            c1.warning("Model: Ollama not detected")
-            c2.metric("Status", "Unavailable")
-            st.info("Structured extraction unavailable. Local model not running.")
+            c1.warning(tr("model_not_detected"))
+            c2.metric(tr("status"), tr("unavailable"))
+            st.info(tr("ai_unavailable_info"))
         if structured:
-            with st.expander("Structured JSON Output", expanded=True):
+            with st.expander(tr("structured_json_output"), expanded=True):
                 st.json(structured)
         else:
-            st.info("No structured data extracted.")
+            st.info(tr("no_structured_data"))
 
     # ------------------------------------------------------------------
     # 7. Performance Metrics
     # ------------------------------------------------------------------
     with st.container(border=True):
-        st.markdown("**Performance Metrics**")
+        st.markdown(f"**{tr('performance_metrics')}**")
         c1, c2, c3, c4 = st.columns(4)
-        c1.metric("Extraction", f"{perf['extract_time']:.2f}s")
-        c2.metric("LLM Inference", f"{perf['llm_time']:.2f}s")
-        c3.metric("Total Pipeline", f"{perf['total_time']:.2f}s")
-        c4.metric("Peak CPU", f"{perf['peak_cpu']:.0f}%")
+        c1.metric(tr("extraction_time"), f"{perf['extract_time']:.2f}s")
+        c2.metric(tr("llm_inference_time"), f"{perf['llm_time']:.2f}s")
+        c3.metric(tr("total_pipeline_time"), f"{perf['total_time']:.2f}s")
+        c4.metric(tr("peak_cpu"), f"{perf['peak_cpu']:.0f}%")
         if perf["peak_memory_bytes"]:
-            st.caption(f"Memory delta: {format_file_size(perf['peak_memory_bytes'])}")
+            st.caption(f"{tr('memory_delta')}: {format_file_size(perf['peak_memory_bytes'])}")

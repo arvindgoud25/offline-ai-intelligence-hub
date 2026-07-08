@@ -41,7 +41,11 @@ def render_sidebar() -> None:
         tr("theme"),
         options=theme_options,
         index=theme_options.index(get_theme()),
-        format_func=lambda x: x.capitalize(),
+        format_func=lambda x: {
+            "system": tr("theme_system"),
+            "light": tr("theme_light"),
+            "dark": tr("theme_dark"),
+        }.get(x, x.capitalize()),
     )
     set_theme(selected_theme)
 

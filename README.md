@@ -20,9 +20,13 @@ Supported Formats
 - JPG
 - JPEG
 - TXT
-- DOCX
+- CSV
+- JSON
+- XML
+- MD
 - WAV
 - MP3
+- FLAC
 
 ---
 
@@ -153,7 +157,6 @@ offline-ai-intelligence-hub/
 │
 ├── app.py
 ├── config.py
-├── schemas.py
 │
 ├── ingestion/
 │   ├── extractor.py
@@ -176,11 +179,21 @@ offline-ai-intelligence-hub/
 ├── pipeline/
 │   └── export.py
 │
+├── schemas/
+│   └── __init__.py
+│
 ├── ui/
 │   ├── components/
+│   │   ├── sidebar.py
+│   │   └── file_info.py
 │   └── pages/
+│       ├── upload.py
+│       ├── search.py
+│       ├── view.py
+│       └── analytics.py
 │
 ├── utils/
+│   └── helpers.py
 │
 ├── i18n/
 │   ├── translator.py
@@ -188,12 +201,13 @@ offline-ai-intelligence-hub/
 │
 ├── tests/
 │
-├── uploads/
+├── data/
+│   ├── uploads/
+│   └── storage.db
 ├── exports/
 ├── requirements.txt
 ├── requirements-dev.txt
 ├── Dockerfile
-├── docker-compose.yml
 ├── .gitlab-ci.yml
 └── README.md
 ```
@@ -297,7 +311,7 @@ docker build -t offline-ai-intelligence-hub .
 Run
 
 ```bash
-docker-compose up
+docker run -p 8501:8501 offline-ai-intelligence-hub
 ```
 
 ---
